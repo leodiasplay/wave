@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "Wave",
+      "backgroundColor": "#121212",
     "slug": "wave",
     "version": "1.0.2",
     "orientation": "portrait",
@@ -36,7 +37,8 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "name": "Wave"
+      "name": "Wave",
+      "backgroundColor": "#121212"
     },
     "plugins": [
       "expo-secure-store",

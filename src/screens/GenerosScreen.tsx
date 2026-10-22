@@ -28,6 +28,7 @@ import TrackItem from '../components/TrackItem';
 import { SPOTIFY_COLORS, SPOTIFY_RADIUS } from '../theme/spotifyTheme';
 
 const CORES_TILES: Record<string, string> = {
+  'Hard Techno': '#2b1055',
   'Psytrance': '#8b5cf6',
   'Eletrônica': '#1e3264',
   'Rock': '#e91429',
@@ -39,6 +40,7 @@ const CORES_TILES: Record<string, string> = {
 };
 
 const MAPA_IMAGENS: Record<string, string> = {
+  'Hard Techno': 'https://images.unsplash.com/photo-1574391884720-bbc3740c59d1?w=600&auto=format&fit=crop&q=80',
   'Psytrance': 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80',
   'Eletrônica': 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&auto=format&fit=crop&q=80',
   'Rock': 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=600&auto=format&fit=crop&q=80',
@@ -234,7 +236,7 @@ export default function GenerosScreen({
     const titulo = generoSelecionado ? generoSelecionado.genero : artistaSelecionado || '';
     const subtitulo = generoSelecionado ? 'Gênero Musical' : 'Artista';
     const foto =
-      generoSelecionado?.genero === 'Rock' || artistaSelecionado?.toLowerCase().includes('charlie')
+      generoSelecionado?.genero === 'Rock' || (Boolean(artistaSelecionado) && (artistaSelecionado || '').toLowerCase().includes('charlie'))
         ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=800&auto=format&fit=crop&q=80'
         : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80';
 
@@ -438,7 +440,7 @@ export default function GenerosScreen({
                         >
                           <Image
                             source={{
-                              uri: a.artista.toLowerCase().includes('charlie')
+                              uri: (a.artista || '').toLowerCase().includes('charlie')
                                 ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=300&auto=format&fit=crop&q=80'
                                 : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300&auto=format&fit=crop&q=80',
                             }}
@@ -572,7 +574,7 @@ export default function GenerosScreen({
                         >
                           <Image
                             source={{
-                              uri: a.artista.toLowerCase().includes('charlie')
+                              uri: (a.artista || '').toLowerCase().includes('charlie')
                                 ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=300&auto=format&fit=crop&q=80'
                                 : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300&auto=format&fit=crop&q=80',
                             }}

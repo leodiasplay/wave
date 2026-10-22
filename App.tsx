@@ -29,6 +29,7 @@ import PerfilScreen from './src/screens/PerfilScreen';
 import SpotifyMiniPlayer from './src/components/SpotifyMiniPlayer';
 import SpotifyBottomNav, { SpotifyTabId } from './src/components/SpotifyBottomNav';
 import { SPOTIFY_COLORS, SPOTIFY_RADIUS } from './src/theme/spotifyTheme';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 function getInitialTab(): SpotifyTabId {
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
@@ -677,7 +678,9 @@ function MainApp() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <MainApp />
+      <ErrorBoundary>
+        <MainApp />
+      </ErrorBoundary>
     </SafeAreaProvider>
   );
 }

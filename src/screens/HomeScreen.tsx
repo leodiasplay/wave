@@ -312,7 +312,7 @@ export default function HomeScreen({
       if (existing) {
         existing.total_musicas += 1;
       } else {
-        const fotoHome = homeData?.artistas.find((a) => a.artista.toLowerCase() === nome.toLowerCase())?.imagem_url;
+        const fotoHome = homeData?.artistas?.find((a) => (a.artista || '').toLowerCase() === nome.toLowerCase())?.imagem_url;
         mapa.set(nome, {
           artista: nome,
           total_musicas: 1,
@@ -330,14 +330,14 @@ export default function HomeScreen({
       if (subgeneroSelecionado && m.subgenero !== subgeneroSelecionado) {
         return false;
       }
-      if (artistaFiltroNoGenero && m.artista.toLowerCase() !== artistaFiltroNoGenero.toLowerCase()) {
+      if (artistaFiltroNoGenero && (m.artista || '').toLowerCase() !== (artistaFiltroNoGenero || '').toLowerCase()) {
         return false;
       }
       if (buscaInterna.trim()) {
         const termo = buscaInterna.toLowerCase();
-        const matchTitulo = m.titulo.toLowerCase().includes(termo);
-        const matchArtista = m.artista.toLowerCase().includes(termo);
-        const matchSub = m.subgenero?.toLowerCase().includes(termo);
+        const matchTitulo = (m.titulo || '').toLowerCase().includes(termo);
+        const matchArtista = (m.artista || '').toLowerCase().includes(termo);
+        const matchSub = (m.subgenero || '').toLowerCase().includes(termo);
         if (!matchTitulo && !matchArtista && !matchSub) return false;
       }
       return true;
@@ -402,10 +402,18 @@ export default function HomeScreen({
           )}
         </View>
 
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-        >
+        {carregandoFiltradas ? (
+          <View style={styles.centerLoadingContainer}>
+            <ActivityIndicator size="large" color={SPOTIFY_COLORS.green} />
+            <Text style={styles.centerLoadingText}>
+              Carregando faixas de {generoSelecionado}...
+            </Text>
+          </View>
+        ) : (
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+          >
           {/* Hero Banner do Gênero */}
           <View style={styles.detailBanner}>
             <Image
@@ -536,10 +544,10 @@ export default function HomeScreen({
 
               <View style={styles.artistsGrid}>
                 {artistasDoGenero.map((a) => {
-                  const isSelectedArtist = artistaFiltroNoGenero?.toLowerCase() === a.artista.toLowerCase();
+                  const isSelectedArtist = (artistaFiltroNoGenero || '').toLowerCase() === (a.artista || '').toLowerCase();
                   const foto =
                     a.imagem_url ||
-                    (a.artista.toLowerCase().includes('charlie')
+                    ((a.artista || '').toLowerCase().includes('charlie')
                       ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=300&auto=format&fit=crop&q=80'
                       : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300&auto=format&fit=crop&q=80');
 
@@ -684,6 +692,7 @@ export default function HomeScreen({
 
           <View style={{ height: 120 }} />
         </ScrollView>
+        )}
       </View>
     );
   }
@@ -991,6 +1000,18 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingTop: 16,
     paddingBottom: 24,
+  },
+  centerLoadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  centerLoadingText: {
+    color: SPOTIFY_COLORS.textSecondary,
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 14,
   },
   loadingContainer: {
     paddingVertical: 60,
