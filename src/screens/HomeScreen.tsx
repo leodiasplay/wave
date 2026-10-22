@@ -35,6 +35,83 @@ interface HomeScreenProps {
   onOptionsPress?: (musica: ItemMusica) => void;
 }
 
+interface ArtistaCardItem {
+  artista: string;
+  total_musicas: number;
+  imagem_url: string;
+}
+
+const FOTOS_ARTISTAS_PSYTRANCE: Record<string, string> = {
+  Vegas: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&auto=format&fit=crop&q=80',
+  Mandragora: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=400&auto=format&fit=crop&q=80',
+  Astrix: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&auto=format&fit=crop&q=80',
+  'Vini Vici': 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&auto=format&fit=crop&q=80',
+  Neelix: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&auto=format&fit=crop&q=80',
+  Blazy: 'https://images.unsplash.com/photo-1571266028243-3716f02d2d2e?w=400&auto=format&fit=crop&q=80',
+  Avalon: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&auto=format&fit=crop&q=80',
+  Berg: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=400&auto=format&fit=crop&q=80',
+  'Burn in Noise': 'https://images.unsplash.com/photo-1516873240891-4bf014598ab4?w=400&auto=format&fit=crop&q=80',
+  'Alien Chaos': 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=400&auto=format&fit=crop&q=80',
+  'Belik Boom': 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&auto=format&fit=crop&q=80',
+  Gonzi: 'https://images.unsplash.com/photo-1520523839898-507125cd53c1?w=400&auto=format&fit=crop&q=80',
+  Sajanka: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&auto=format&fit=crop&q=80',
+  'Claudinho Brasil': 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&auto=format&fit=crop&q=80',
+  'Liquid Soul': 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&auto=format&fit=crop&q=80',
+  Phaxe: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&auto=format&fit=crop&q=80',
+  'Morten Granau': 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&auto=format&fit=crop&q=80',
+  Omiki: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&auto=format&fit=crop&q=80',
+  'Fabio Fusco': 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=400&auto=format&fit=crop&q=80',
+  'Ghost Rider': 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&auto=format&fit=crop&q=80',
+  'Astral Projection': 'https://images.unsplash.com/photo-1571266028243-3716f02d2d2e?w=400&auto=format&fit=crop&q=80',
+  Cosmosis: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&auto=format&fit=crop&q=80',
+  'Crazy Astronaut': 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=400&auto=format&fit=crop&q=80',
+  'Mad Tribe': 'https://images.unsplash.com/photo-1516873240891-4bf014598ab4?w=400&auto=format&fit=crop&q=80',
+  Skazi: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=400&auto=format&fit=crop&q=80',
+  'Sesto Sento': 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&auto=format&fit=crop&q=80',
+  UnderCover: 'https://images.unsplash.com/photo-1520523839898-507125cd53c1?w=400&auto=format&fit=crop&q=80',
+  'Special M': 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&auto=format&fit=crop&q=80',
+  Tristan: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&auto=format&fit=crop&q=80',
+  'E-Mantra': 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&auto=format&fit=crop&q=80',
+  Goasia: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&auto=format&fit=crop&q=80',
+  Virtuanoise: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&auto=format&fit=crop&q=80',
+  Oxidaksi: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&auto=format&fit=crop&q=80',
+  Arjuna: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=400&auto=format&fit=crop&q=80',
+  'Man With No Name': 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&auto=format&fit=crop&q=80',
+  Maramba: 'https://images.unsplash.com/photo-1571266028243-3716f02d2d2e?w=400&auto=format&fit=crop&q=80',
+};
+
+const FOTOS_POOL = [
+  'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1571266028243-3716f02d2d2e?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1516873240891-4bf014598ab4?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1520523839898-507125cd53c1?w=400&auto=format&fit=crop&q=80',
+];
+
+function getFotoArtistaPsy(nome: string): string {
+  if (FOTOS_ARTISTAS_PSYTRANCE[nome]) return FOTOS_ARTISTAS_PSYTRANCE[nome];
+  let hash = 0;
+  for (let i = 0; i < nome.length; i++) {
+    hash = (hash << 5) - hash + nome.charCodeAt(i);
+    hash |= 0;
+  }
+  const index = Math.abs(hash) % FOTOS_POOL.length;
+  return FOTOS_POOL[index];
+}
+
+const ARTISTAS_PSYTRANCE_INICIAIS: ArtistaCardItem[] = Object.keys(FOTOS_ARTISTAS_PSYTRANCE).map((nome) => ({
+  artista: nome,
+  total_musicas: nome === 'Vegas' ? 11 : 10,
+  imagem_url: FOTOS_ARTISTAS_PSYTRANCE[nome],
+}));
+
 const MAPA_IMAGENS_GENEROS: Record<string, string> = {
   Psytrance: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80',
   Eletrônica: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80',
@@ -59,6 +136,7 @@ export default function HomeScreen({
   const [homeData, setHomeData] = useState<HomeData | null>(null);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [pastasGeneros, setPastasGeneros] = useState<PastaGeneroItem[]>([]);
+  const [artistasPsytrance, setArtistasPsytrance] = useState<ArtistaCardItem[]>(ARTISTAS_PSYTRANCE_INICIAIS);
 
   // Estados de navegação interna (Gênero -> Subvertente -> Artista)
   const [generoSelecionado, setGeneroSelecionado] = useState<string | null>(null);
@@ -76,10 +154,11 @@ export default function HomeScreen({
   const carregarDadosHome = useCallback(async () => {
     try {
       setCarregando(true);
-      const [hRes, pRes, pgRes] = await Promise.all([
+      const [hRes, pRes, pgRes, psyRes] = await Promise.all([
         obterHomeData(token).catch(() => null),
         listarPlaylists(token).catch(() => []),
         obterPastasGeneros(token).catch(() => []),
+        listarMusicas({ genero: 'Psytrance', limit: 500 }, token).catch(() => null),
       ]);
 
       if (hRes) {
@@ -90,6 +169,28 @@ export default function HomeScreen({
       }
       setPlaylists(pRes || []);
       setPastasGeneros(pgRes || []);
+
+      if (psyRes?.data && psyRes.data.length > 0) {
+        const mapPsy = new Map<string, { artista: string; total_musicas: number; imagem_url: string }>();
+        psyRes.data.forEach((m) => {
+          const nome = m.artista?.trim();
+          if (!nome || nome === 'Desconhecido') return;
+          const atual = mapPsy.get(nome);
+          if (atual) {
+            atual.total_musicas += 1;
+          } else {
+            mapPsy.set(nome, {
+              artista: nome,
+              total_musicas: 1,
+              imagem_url: getFotoArtistaPsy(nome),
+            });
+          }
+        });
+        const listaPsy = Array.from(mapPsy.values()).sort((a, b) => b.total_musicas - a.total_musicas);
+        if (listaPsy.length > 0) {
+          setArtistasPsytrance(listaPsy);
+        }
+      }
     } catch (e) {
       console.warn('Erro ao carregar Home:', e);
     } finally {
@@ -713,8 +814,18 @@ export default function HomeScreen({
   }
 
   // ========================================================
-  // VIEW 3: HOME PRINCIPAL (GÊNEROS, ARTISTAS E MIX WAVE)
+  // VIEW 3: HOME PRINCIPAL (CARROSSEL PSYTRANCE, GÊNEROS E MIX WAVE)
   // ========================================================
+  const psytranceCards: CarouselCardItem[] = useMemo(() => {
+    return artistasPsytrance.map((a) => ({
+      id: "psy-" + a.artista,
+      titulo: a.artista,
+      subtitulo: String(a.total_musicas) + (a.total_musicas === 1 ? " faixa" : " faixas"),
+      imagemUrl: a.imagem_url,
+      isCircular: true,
+      onPress: () => handleSelecionarArtista(a.artista),
+    }));
+  }, [artistasPsytrance]);
   const mixCards: CarouselCardItem[] = (homeData?.mix_recomendado || []).map((m) => ({
     id: m.id || m.caminho_arquivo,
     titulo: m.titulo,
@@ -729,6 +840,21 @@ export default function HomeScreen({
       player.play(m, homeData?.mix_recomendado || [m]);
     },
   }));
+
+  const outrosArtistasCards: CarouselCardItem[] = useMemo(() => {
+    return (homeData?.artistas || [])
+      .filter((a) => !artistasPsytrance.some((p) => p.artista.toLowerCase() === a.artista.toLowerCase()))
+      .map((a) => ({
+        id: `outros-${a.artista}`,
+        titulo: a.artista,
+        subtitulo: `${a.total_musicas} ${a.total_musicas === 1 ? 'faixa' : 'faixas'}`,
+        imagemUrl: (a as any).imagem_url || (a.artista.toLowerCase().includes('charlie')
+          ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&auto=format&fit=crop&q=80'
+          : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&auto=format&fit=crop&q=80'),
+        isCircular: true,
+        onPress: () => handleSelecionarArtista(a.artista),
+      }));
+  }, [homeData, artistasPsytrance]);
 
   const generosDisponiveis = homeData?.generos || [];
   const artistasDisponiveis = homeData?.artistas || [];
@@ -756,6 +882,18 @@ export default function HomeScreen({
           </View>
         ) : (
           <>
+            {/* ==================================================== */}
+            {/* SEÇÃO 1: CARROSSEL DE ARTISTAS PSYTRANCE (DESTAQUE)  */}
+            {/* ==================================================== */}
+            {psytranceCards.length > 0 && (
+              <SpotifyCarousel
+                titulo="Psytrance"
+                subtitulo="Todos os artistas da vertente • Toque para explorar as músicas"
+                items={psytranceCards}
+                onPressVerTudo={() => handleSelecionarGenero('Psytrance')}
+              />
+            )}
+
             {/* ==================================================== */}
             {/* SEÇÃO 1: GÊNEROS DISPONÍVEIS COM SUBVERTENTES        */}
             {/* ==================================================== */}
@@ -810,45 +948,16 @@ export default function HomeScreen({
             )}
 
             {/* ==================================================== */}
-            {/* SEÇÃO 2: ARTISTAS EM DESTAQUE                        */}
+            {/* SEÇÃO 3: OUTROS ARTISTAS (CARROSSEL)                 */}
             {/* ==================================================== */}
-            {artistasDisponiveis.length > 0 && (
-              <View style={styles.sectionContainer}>
-                <View style={styles.sectionHeaderRow}>
-                  <Text style={styles.sectionTitle}>Artistas em Destaque</Text>
-                  <Text style={styles.sectionSubtitle}>
-                    Conheça os artistas com maior catálogo na plataforma
-                  </Text>
-                </View>
-
-                <View style={styles.artistsGrid}>
-                  {artistasDisponiveis.slice(0, 9).map((a) => {
-                    const foto =
-                      (a as any).imagem_url ||
-                      (a.artista.toLowerCase().includes('charlie')
-                        ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=300&auto=format&fit=crop&q=80'
-                        : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300&auto=format&fit=crop&q=80');
-
-                    return (
-                      <TouchableOpacity
-                        key={a.artista}
-                        style={styles.artistCard}
-                        onPress={() => handleSelecionarArtista(a.artista)}
-                        activeOpacity={0.8}
-                      >
-                        <Image source={{ uri: foto }} style={styles.artistAvatar} />
-                        <Text style={styles.artistName} numberOfLines={1}>
-                          {a.artista}
-                        </Text>
-                        <Text style={styles.artistCount}>
-                          {a.total_musicas} faixas
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              </View>
+            {outrosArtistasCards.length > 0 && (
+              <SpotifyCarousel
+                titulo="Outros Artistas"
+                subtitulo="Mais artistas do acervo Wave"
+                items={outrosArtistasCards}
+              />
             )}
+
 
             {/* ==================================================== */}
             {/* SEÇÃO 3: MIX WAVE • FAIXAS RECOMENDADAS              */}
