@@ -22,7 +22,25 @@ export default function SpotifyBottomNav({
   onSelecionarTab,
 }: SpotifyBottomNavProps) {
   const insets = useSafeAreaInsets();
-  const bottomPadding = Math.max(insets.bottom, Platform.OS === 'ios' ? 16 : 8);
+
+  const isAndroid =
+    Platform.OS === 'android' ||
+    (Platform.OS === 'web' &&
+      typeof navigator !== 'undefined' &&
+      /android/i.test(navigator.userAgent));
+
+  const isIOS =
+    Platform.OS === 'ios' ||
+    (Platform.OS === 'web' &&
+      typeof navigator !== 'undefined' &&
+      /iphone|ipad|ipod/i.test(navigator.userAgent));
+
+  // No Android, a barra de navegação nativa do sistema (botões Voltar/Home/Recentes)
+  // exige separação confortável (mínimo 32px) para nunca colidir com os toques
+  const bottomPadding = Math.max(
+    insets.bottom,
+    isAndroid ? 32 : isIOS ? 22 : 12
+  );
 
   const tabs: { id: SpotifyTabId; label: string; iconAtivo: any; iconInativo: any }[] = [
     {
@@ -52,7 +70,7 @@ export default function SpotifyBottomNav({
   ];
 
   return (
-    <View style={[styles.container, { paddingBottom: bottomPadding, height: 56 + bottomPadding }]}>
+    <View style={[styles.container, { paddingBottom: bottomPadding }]}>
       {tabs.map((tab) => {
         const ativo = tabAtiva === tab.id;
         return (
@@ -88,8 +106,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: SPOTIFY_COLORS.background,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.06)',
-    alignItems: 'center',
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    paddingTop: 8,
     justifyContent: 'space-around',
   },
   tabItem: {

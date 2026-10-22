@@ -61,6 +61,12 @@ export default function SpotifyMiniPlayer({
   const insets = useSafeAreaInsets();
   const [modalExpandido, setModalExpandido] = useState(false);
 
+  const isAndroid =
+    Platform.OS === 'android' ||
+    (Platform.OS === 'web' &&
+      typeof navigator !== 'undefined' &&
+      /android/i.test(navigator.userAgent));
+
   if (!currentTrack) return null;
 
   const duracaoValida = duration > 0 ? duration : currentTrack.duracao_segundos || 180;
@@ -220,7 +226,7 @@ export default function SpotifyMiniPlayer({
         transparent={false}
         onRequestClose={() => setModalExpandido(false)}
       >
-        <View style={[styles.fullModalContainer, { paddingTop: Math.max(insets.top, 12), paddingBottom: Math.max(insets.bottom, 24) }]}>
+        <View style={[styles.fullModalContainer, { paddingTop: Math.max(insets.top, 12), paddingBottom: Math.max(insets.bottom, isAndroid ? 36 : 24) }]}>
           {/* Header Superior: Minimizar + Título do Contexto + Opções */}
           <View style={styles.fullHeader}>
             <TouchableOpacity
