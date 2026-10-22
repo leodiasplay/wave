@@ -359,6 +359,49 @@ export default function HomeScreen({
     }
   };
 
+  const psytranceCards: CarouselCardItem[] = useMemo(() => {
+    return artistasPsytrance.map((a) => ({
+      id: "psy-" + a.artista,
+      titulo: a.artista,
+      subtitulo: String(a.total_musicas) + (a.total_musicas === 1 ? " faixa" : " faixas"),
+      imagemUrl: a.imagem_url,
+      isCircular: true,
+      onPress: () => handleSelecionarArtista(a.artista),
+    }));
+  }, [artistasPsytrance]);
+  const mixCards: CarouselCardItem[] = (homeData?.mix_recomendado || []).map((m) => ({
+    id: m.id || m.caminho_arquivo,
+    titulo: m.titulo,
+    subtitulo: `${m.artista}${m.duracao_formatada ? ' • ' + m.duracao_formatada : ''}`,
+    imagemUrl:
+      m.genero === 'Rock'
+        ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&auto=format&fit=crop&q=80'
+        : m.genero === 'Psytrance'
+        ? 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&auto=format&fit=crop&q=80'
+        : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&auto=format&fit=crop&q=80',
+    onPress: () => {
+      player.play(m, homeData?.mix_recomendado || [m]);
+    },
+  }));
+
+  const outrosArtistasCards: CarouselCardItem[] = useMemo(() => {
+    return (homeData?.artistas || [])
+      .filter((a) => !artistasPsytrance.some((p) => p.artista.toLowerCase() === a.artista.toLowerCase()))
+      .map((a) => ({
+        id: `outros-${a.artista}`,
+        titulo: a.artista,
+        subtitulo: `${a.total_musicas} ${a.total_musicas === 1 ? 'faixa' : 'faixas'}`,
+        imagemUrl: (a as any).imagem_url || (a.artista.toLowerCase().includes('charlie')
+          ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&auto=format&fit=crop&q=80'
+          : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&auto=format&fit=crop&q=80'),
+        isCircular: true,
+        onPress: () => handleSelecionarArtista(a.artista),
+      }));
+  }, [homeData, artistasPsytrance]);
+
+  const generosDisponiveis = homeData?.generos || [];
+  const artistasDisponiveis = homeData?.artistas || [];
+
   // ========================================================
   // VIEW 1: DETALHE DO GÊNERO (SUBVERTENTES + ARTISTAS + MÚSICAS)
   // ========================================================
@@ -826,48 +869,7 @@ export default function HomeScreen({
   // ========================================================
   // VIEW 3: HOME PRINCIPAL (CARROSSEL PSYTRANCE, GÊNEROS E MIX WAVE)
   // ========================================================
-  const psytranceCards: CarouselCardItem[] = useMemo(() => {
-    return artistasPsytrance.map((a) => ({
-      id: "psy-" + a.artista,
-      titulo: a.artista,
-      subtitulo: String(a.total_musicas) + (a.total_musicas === 1 ? " faixa" : " faixas"),
-      imagemUrl: a.imagem_url,
-      isCircular: true,
-      onPress: () => handleSelecionarArtista(a.artista),
-    }));
-  }, [artistasPsytrance]);
-  const mixCards: CarouselCardItem[] = (homeData?.mix_recomendado || []).map((m) => ({
-    id: m.id || m.caminho_arquivo,
-    titulo: m.titulo,
-    subtitulo: `${m.artista}${m.duracao_formatada ? ' • ' + m.duracao_formatada : ''}`,
-    imagemUrl:
-      m.genero === 'Rock'
-        ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&auto=format&fit=crop&q=80'
-        : m.genero === 'Psytrance'
-        ? 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&auto=format&fit=crop&q=80'
-        : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&auto=format&fit=crop&q=80',
-    onPress: () => {
-      player.play(m, homeData?.mix_recomendado || [m]);
-    },
-  }));
 
-  const outrosArtistasCards: CarouselCardItem[] = useMemo(() => {
-    return (homeData?.artistas || [])
-      .filter((a) => !artistasPsytrance.some((p) => p.artista.toLowerCase() === a.artista.toLowerCase()))
-      .map((a) => ({
-        id: `outros-${a.artista}`,
-        titulo: a.artista,
-        subtitulo: `${a.total_musicas} ${a.total_musicas === 1 ? 'faixa' : 'faixas'}`,
-        imagemUrl: (a as any).imagem_url || (a.artista.toLowerCase().includes('charlie')
-          ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&auto=format&fit=crop&q=80'
-          : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&auto=format&fit=crop&q=80'),
-        isCircular: true,
-        onPress: () => handleSelecionarArtista(a.artista),
-      }));
-  }, [homeData, artistasPsytrance]);
-
-  const generosDisponiveis = homeData?.generos || [];
-  const artistasDisponiveis = homeData?.artistas || [];
 
   return (
     <View style={styles.container}>
