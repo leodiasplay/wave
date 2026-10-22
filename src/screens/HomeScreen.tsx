@@ -883,18 +883,6 @@ export default function HomeScreen({
         ) : (
           <>
             {/* ==================================================== */}
-            {/* SEÇÃO 1: CARROSSEL DE ARTISTAS PSYTRANCE (DESTAQUE)  */}
-            {/* ==================================================== */}
-            {psytranceCards.length > 0 && (
-              <SpotifyCarousel
-                titulo="Psytrance"
-                subtitulo="Todos os artistas da vertente • Toque para explorar as músicas"
-                items={psytranceCards}
-                onPressVerTudo={() => handleSelecionarGenero('Psytrance')}
-              />
-            )}
-
-            {/* ==================================================== */}
             {/* SEÇÃO 1: GÊNEROS DISPONÍVEIS COM SUBVERTENTES        */}
             {/* ==================================================== */}
             {generosDisponiveis.length > 0 && (
@@ -945,6 +933,18 @@ export default function HomeScreen({
                   })}
                 </View>
               </View>
+            )}
+
+            {/* ==================================================== */}
+            {/* SEÇÃO 2: CARROSSEL DE ARTISTAS PSYTRANCE (DESTAQUE)  */}
+            {/* ==================================================== */}
+            {psytranceCards.length > 0 && (
+              <SpotifyCarousel
+                titulo="Psytrance"
+                subtitulo="Todos os artistas da vertente • Toque para explorar as músicas"
+                items={psytranceCards}
+                onPressVerTudo={() => handleSelecionarGenero('Psytrance')}
+              />
             )}
 
             {/* ==================================================== */}
