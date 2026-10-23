@@ -37,6 +37,13 @@ interface HomeScreenProps {
   onOptionsPress?: (musica: ItemMusica) => void;
 }
 
+export interface GeneroCarrosselItem {
+  genero: string;
+  totalArtistas: number;
+  totalFaixas: number;
+  cards: CarouselCardItem[];
+}
+
 interface ArtistaCardItem {
   artista: string;
   total_musicas: number;
@@ -141,7 +148,7 @@ export default function HomeScreen({
   const [homeData, setHomeData] = useState<HomeData | null>(null);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [pastasGeneros, setPastasGeneros] = useState<PastaGeneroItem[]>([]);
-  const [artistasBanco, setArtistasBanco] = useState<ArtistaCardItem[]>([]);
+  const [carrosseisGeneros, setCarrosseisGeneros] = useState<GeneroCarrosselItem[]>([]);
 
   // Estados de navegação interna (Gênero -> Subvertente -> Artista)
   const [generoSelecionado, setGeneroSelecionado] = useState<string | null>(null);
@@ -159,11 +166,11 @@ export default function HomeScreen({
   const carregarDadosHome = useCallback(async () => {
     try {
       setCarregando(true);
-      const [hRes, pRes, pgRes, artsRes] = await Promise.all([
+      const [hRes, pRes, pgRes, musicasRes] = await Promise.all([
         obterHomeData(token).catch(() => null),
         listarPlaylists(token).catch(() => []),
         obterPastasGeneros(token).catch(() => []),
-        obterArtistas(token).catch(() => []),
+        listarMusicas({ limit: 1500 }, token).catch(() => null),
       ]);
 
       if (hRes) {
@@ -175,17 +182,54 @@ export default function HomeScreen({
       setPlaylists(pRes || []);
       setPastasGeneros(pgRes || []);
 
-      // Artistas carregados automaticamente do banco de dados
-      const listaDoBanco = (artsRes && artsRes.length > 0 ? artsRes : hRes?.artistas || [])
-        .filter((a: ArtistaItem) => (a.total_musicas || 0) > 0 && a.artista && a.artista.trim() && a.artista.trim().toLowerCase() !== 'desconhecido')
-        .map((a: ArtistaItem) => ({
-          artista: a.artista.trim(),
-          total_musicas: a.total_musicas,
-          imagem_url: a.imagem_url || getFotoArtista(a.artista.trim()),
-        }));
+      // Processa e agrupa automaticamente os artistas de cada gênero existente no banco
+      if (musicasRes?.data && musicasRes.data.length > 0) {
+        const tracks = musicasRes.data;
+        const genMap = new Map<string, Map<string, number>>();
+        const genFaixasCount = new Map<string, number>();
 
-      if (listaDoBanco.length > 0) {
-        setArtistasBanco(listaDoBanco);
+        for (const t of tracks) {
+          const g = t.genero?.trim();
+          const a = t.artista?.trim();
+          if (g) {
+            genFaixasCount.set(g, (genFaixasCount.get(g) || 0) + 1);
+            if (a && a.toLowerCase() !== 'desconhecido') {
+              if (!genMap.has(g)) {
+                genMap.set(g, new Map<string, number>());
+              }
+              const aMap = genMap.get(g)!;
+              aMap.set(a, (aMap.get(a) || 0) + 1);
+            }
+          }
+        }
+
+        // Ordena os gêneros por quantidade de faixas
+        const generosOrdenados = Array.from(genMap.keys()).sort(
+          (a, b) => (genFaixasCount.get(b) || 0) - (genFaixasCount.get(a) || 0)
+        );
+
+        const carrosseisMontados: GeneroCarrosselItem[] = generosOrdenados.map((nomeGenero) => {
+          const artMap = genMap.get(nomeGenero)!;
+          const artistasOrdenados = Array.from(artMap.entries())
+            .sort((a, b) => b[1] - a[1])
+            .map(([nomeArtista, total]) => ({
+              id: `${nomeGenero}-${nomeArtista}`,
+              titulo: nomeArtista,
+              subtitulo: `${total} ${total === 1 ? 'faixa' : 'faixas'}`,
+              imagemUrl: getFotoArtista(nomeArtista),
+              isCircular: true,
+              onPress: () => handleSelecionarArtista(nomeArtista),
+            }));
+
+          return {
+            genero: nomeGenero,
+            totalArtistas: artistasOrdenados.length,
+            totalFaixas: genFaixasCount.get(nomeGenero) || 0,
+            cards: artistasOrdenados,
+          };
+        });
+
+        setCarrosseisGeneros(carrosseisMontados);
       }
     } catch (e) {
       console.warn('Erro ao carregar Home:', e);
@@ -354,16 +398,7 @@ export default function HomeScreen({
     }
   };
 
-  const artistasCards: CarouselCardItem[] = useMemo(() => {
-    return artistasBanco.map((a) => ({
-      id: "artista-" + a.artista,
-      titulo: a.artista,
-      subtitulo: `${a.total_musicas} ${a.total_musicas === 1 ? 'faixa' : 'faixas'}`,
-      imagemUrl: a.imagem_url,
-      isCircular: true,
-      onPress: () => handleSelecionarArtista(a.artista),
-    }));
-  }, [artistasBanco]);
+
 
   const mixCards: CarouselCardItem[] = useMemo(() => {
     return (homeData?.mix_recomendado || []).map((m) => ({
@@ -931,16 +966,17 @@ export default function HomeScreen({
             )}
 
             {/* ==================================================== */}
-            {/* SEÇÃO 2: CARROSSEL DE ARTISTAS (AUTOMÁTICO DO BANCO)  */}
+            {/* SEÇÃO 2: UM CARROSSEL DE ARTISTAS PARA CADA GÊNERO     */}
             {/* ==================================================== */}
-            {artistasCards.length > 0 && (
+            {carrosseisGeneros.map((c) => (
               <SpotifyCarousel
-                titulo="Artistas"
-                subtitulo="Todos os artistas da biblioteca • Toque para explorar as músicas"
-                items={artistasCards}
-                onPressVerTudo={() => onNavegarTab('buscar')}
+                key={c.genero}
+                titulo={c.genero}
+                subtitulo={`Artistas de ${c.genero} • ${c.totalArtistas} ${c.totalArtistas === 1 ? 'artista' : 'artistas'}`}
+                items={c.cards}
+                onPressVerTudo={() => handleSelecionarGenero(c.genero)}
               />
-            )}
+            ))}
 
 
             {/* ==================================================== */}
