@@ -19,8 +19,10 @@ import {
   ItemMusica,
   HomeData,
   PastaGeneroItem,
+  ArtistaItem,
   obterHomeData,
   obterPastasGeneros,
+  obterArtistas,
   listarMusicas,
   alternarFavorita,
   isSameTrack,
@@ -95,7 +97,7 @@ const FOTOS_POOL = [
   'https://images.unsplash.com/photo-1520523839898-507125cd53c1?w=400&auto=format&fit=crop&q=80',
 ];
 
-function getFotoArtistaPsy(nome: string): string {
+function getFotoArtista(nome: string): string {
   if (FOTOS_ARTISTAS_PSYTRANCE[nome]) return FOTOS_ARTISTAS_PSYTRANCE[nome];
   let hash = 0;
   for (let i = 0; i < nome.length; i++) {
@@ -114,6 +116,8 @@ const ARTISTAS_PSYTRANCE_INICIAIS: ArtistaCardItem[] = Object.keys(FOTOS_ARTISTA
 
 const MAPA_IMAGENS_GENEROS: Record<string, string> = {
   'Hard Techno': 'https://images.unsplash.com/photo-1574391884720-bbc3740c59d1?w=800&auto=format&fit=crop&q=80',
+  'Techno House': 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80',
+  'Tech House': 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80',
   Psytrance: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80',
   Eletrônica: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80',
   Rock: 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=800&auto=format&fit=crop&q=80',
@@ -137,7 +141,7 @@ export default function HomeScreen({
   const [homeData, setHomeData] = useState<HomeData | null>(null);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [pastasGeneros, setPastasGeneros] = useState<PastaGeneroItem[]>([]);
-  const [artistasPsytrance, setArtistasPsytrance] = useState<ArtistaCardItem[]>(ARTISTAS_PSYTRANCE_INICIAIS);
+  const [artistasBanco, setArtistasBanco] = useState<ArtistaCardItem[]>([]);
 
   // Estados de navegação interna (Gênero -> Subvertente -> Artista)
   const [generoSelecionado, setGeneroSelecionado] = useState<string | null>(null);
@@ -155,11 +159,11 @@ export default function HomeScreen({
   const carregarDadosHome = useCallback(async () => {
     try {
       setCarregando(true);
-      const [hRes, pRes, pgRes, psyRes] = await Promise.all([
+      const [hRes, pRes, pgRes, artsRes] = await Promise.all([
         obterHomeData(token).catch(() => null),
         listarPlaylists(token).catch(() => []),
         obterPastasGeneros(token).catch(() => []),
-        listarMusicas({ genero: 'Psytrance', limit: 500 }, token).catch(() => null),
+        obterArtistas(token).catch(() => []),
       ]);
 
       if (hRes) {
@@ -171,26 +175,17 @@ export default function HomeScreen({
       setPlaylists(pRes || []);
       setPastasGeneros(pgRes || []);
 
-      if (psyRes?.data && psyRes.data.length > 0) {
-        const mapPsy = new Map<string, { artista: string; total_musicas: number; imagem_url: string }>();
-        psyRes.data.forEach((m) => {
-          const nome = m.artista?.trim();
-          if (!nome || nome === 'Desconhecido') return;
-          const atual = mapPsy.get(nome);
-          if (atual) {
-            atual.total_musicas += 1;
-          } else {
-            mapPsy.set(nome, {
-              artista: nome,
-              total_musicas: 1,
-              imagem_url: getFotoArtistaPsy(nome),
-            });
-          }
-        });
-        const listaPsy = Array.from(mapPsy.values()).sort((a, b) => b.total_musicas - a.total_musicas);
-        if (listaPsy.length > 0) {
-          setArtistasPsytrance(listaPsy);
-        }
+      // Artistas carregados automaticamente do banco de dados
+      const listaDoBanco = (artsRes && artsRes.length > 0 ? artsRes : hRes?.artistas || [])
+        .filter((a: ArtistaItem) => (a.total_musicas || 0) > 0 && a.artista && a.artista.trim() && a.artista.trim().toLowerCase() !== 'desconhecido')
+        .map((a: ArtistaItem) => ({
+          artista: a.artista.trim(),
+          total_musicas: a.total_musicas,
+          imagem_url: a.imagem_url || getFotoArtista(a.artista.trim()),
+        }));
+
+      if (listaDoBanco.length > 0) {
+        setArtistasBanco(listaDoBanco);
       }
     } catch (e) {
       console.warn('Erro ao carregar Home:', e);
@@ -359,45 +354,33 @@ export default function HomeScreen({
     }
   };
 
-  const psytranceCards: CarouselCardItem[] = useMemo(() => {
-    return artistasPsytrance.map((a) => ({
-      id: "psy-" + a.artista,
+  const artistasCards: CarouselCardItem[] = useMemo(() => {
+    return artistasBanco.map((a) => ({
+      id: "artista-" + a.artista,
       titulo: a.artista,
-      subtitulo: String(a.total_musicas) + (a.total_musicas === 1 ? " faixa" : " faixas"),
+      subtitulo: `${a.total_musicas} ${a.total_musicas === 1 ? 'faixa' : 'faixas'}`,
       imagemUrl: a.imagem_url,
       isCircular: true,
       onPress: () => handleSelecionarArtista(a.artista),
     }));
-  }, [artistasPsytrance]);
-  const mixCards: CarouselCardItem[] = (homeData?.mix_recomendado || []).map((m) => ({
-    id: m.id || m.caminho_arquivo,
-    titulo: m.titulo,
-    subtitulo: `${m.artista}${m.duracao_formatada ? ' • ' + m.duracao_formatada : ''}`,
-    imagemUrl:
-      m.genero === 'Rock'
-        ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&auto=format&fit=crop&q=80'
-        : m.genero === 'Psytrance'
-        ? 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&auto=format&fit=crop&q=80'
-        : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&auto=format&fit=crop&q=80',
-    onPress: () => {
-      player.play(m, homeData?.mix_recomendado || [m]);
-    },
-  }));
+  }, [artistasBanco]);
 
-  const outrosArtistasCards: CarouselCardItem[] = useMemo(() => {
-    return (homeData?.artistas || [])
-      .filter((a) => !artistasPsytrance.some((p) => p.artista.toLowerCase() === a.artista.toLowerCase()))
-      .map((a) => ({
-        id: `outros-${a.artista}`,
-        titulo: a.artista,
-        subtitulo: `${a.total_musicas} ${a.total_musicas === 1 ? 'faixa' : 'faixas'}`,
-        imagemUrl: (a as any).imagem_url || (a.artista.toLowerCase().includes('charlie')
+  const mixCards: CarouselCardItem[] = useMemo(() => {
+    return (homeData?.mix_recomendado || []).map((m) => ({
+      id: m.id || m.caminho_arquivo,
+      titulo: m.titulo,
+      subtitulo: `${m.artista}${m.duracao_formatada ? ' • ' + m.duracao_formatada : ''}`,
+      imagemUrl:
+        m.genero === 'Rock'
           ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&auto=format&fit=crop&q=80'
-          : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&auto=format&fit=crop&q=80'),
-        isCircular: true,
-        onPress: () => handleSelecionarArtista(a.artista),
-      }));
-  }, [homeData, artistasPsytrance]);
+          : m.genero === 'Psytrance'
+          ? 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&auto=format&fit=crop&q=80'
+          : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&auto=format&fit=crop&q=80',
+      onPress: () => {
+        player.play(m, homeData?.mix_recomendado || [m]);
+      },
+    }));
+  }, [homeData?.mix_recomendado, player]);
 
   const generosDisponiveis = homeData?.generos || [];
   const artistasDisponiveis = homeData?.artistas || [];
@@ -948,25 +931,14 @@ export default function HomeScreen({
             )}
 
             {/* ==================================================== */}
-            {/* SEÇÃO 2: CARROSSEL DE ARTISTAS PSYTRANCE (DESTAQUE)  */}
+            {/* SEÇÃO 2: CARROSSEL DE ARTISTAS (AUTOMÁTICO DO BANCO)  */}
             {/* ==================================================== */}
-            {psytranceCards.length > 0 && (
+            {artistasCards.length > 0 && (
               <SpotifyCarousel
-                titulo="Psytrance"
-                subtitulo="Todos os artistas da vertente • Toque para explorar as músicas"
-                items={psytranceCards}
-                onPressVerTudo={() => handleSelecionarGenero('Psytrance')}
-              />
-            )}
-
-            {/* ==================================================== */}
-            {/* SEÇÃO 3: OUTROS ARTISTAS (CARROSSEL)                 */}
-            {/* ==================================================== */}
-            {outrosArtistasCards.length > 0 && (
-              <SpotifyCarousel
-                titulo="Outros Artistas"
-                subtitulo="Mais artistas do acervo Wave"
-                items={outrosArtistasCards}
+                titulo="Artistas"
+                subtitulo="Todos os artistas da biblioteca • Toque para explorar as músicas"
+                items={artistasCards}
+                onPressVerTudo={() => onNavegarTab('buscar')}
               />
             )}
 
