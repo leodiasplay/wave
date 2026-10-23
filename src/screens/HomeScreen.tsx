@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SPOTIFY_COLORS, SPOTIFY_RADIUS } from '../theme/spotifyTheme';
+import { obterFotoRealGdrive } from '../constants/artistasGdriveMap';
 import SpotifyCarousel, { CarouselCardItem } from '../components/SpotifyCarousel';
 import TrackItem from '../components/TrackItem';
 import {
@@ -105,6 +106,8 @@ const FOTOS_POOL = [
 ];
 
 function getFotoArtista(nome: string): string {
+  const gdriveUrl = obterFotoRealGdrive(nome);
+  if (gdriveUrl) return gdriveUrl;
   if (FOTOS_ARTISTAS_PSYTRANCE[nome]) return FOTOS_ARTISTAS_PSYTRANCE[nome];
   let hash = 0;
   for (let i = 0; i < nome.length; i++) {
@@ -351,11 +354,12 @@ export default function HomeScreen({
       if (existing) {
         existing.total_musicas += 1;
       } else {
+        const fotoReal = obterFotoRealGdrive(nome);
         const fotoHome = homeData?.artistas?.find((a) => (a.artista || '').toLowerCase() === nome.toLowerCase())?.imagem_url;
         mapa.set(nome, {
           artista: nome,
           total_musicas: 1,
-          imagem_url: fotoHome || m.capa_url || undefined,
+          imagem_url: fotoReal || fotoHome || getFotoArtista(nome) || m.capa_url || undefined,
         });
       }
     });
@@ -607,10 +611,9 @@ export default function HomeScreen({
                 {artistasDoGenero.map((a) => {
                   const isSelectedArtist = (artistaFiltroNoGenero || '').toLowerCase() === (a.artista || '').toLowerCase();
                   const foto =
+                    obterFotoRealGdrive(a.artista) ||
                     a.imagem_url ||
-                    ((a.artista || '').toLowerCase().includes('charlie')
-                      ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=300&auto=format&fit=crop&q=80'
-                      : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300&auto=format&fit=crop&q=80');
+                    getFotoArtista(a.artista);
 
                   return (
                     <TouchableOpacity
@@ -763,9 +766,8 @@ export default function HomeScreen({
   // ========================================================
   if (artistaSelecionado) {
     const fotoBanner =
-      artistaSelecionado.toLowerCase().includes('charlie')
-        ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=800&auto=format&fit=crop&q=80'
-        : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80';
+      obterFotoRealGdrive(artistaSelecionado) ||
+      getFotoArtista(artistaSelecionado);
 
     const faixasArtista = musicasFiltradas.filter((m) => {
       if (!buscaInterna.trim()) return true;

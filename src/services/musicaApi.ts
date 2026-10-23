@@ -72,9 +72,14 @@ export interface FiltrosMusica {
 }
 
 export interface ArtistaItem {
+  id?: number;
   artista: string;
   total_musicas: number;
   imagem_url?: string;
+  foto_perfil_url?: string;
+  drive_file_id?: string;
+  drive_url?: string;
+  foto_atualizada?: boolean;
   apenas_disco?: boolean;
 }
 

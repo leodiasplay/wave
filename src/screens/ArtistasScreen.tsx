@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   TextInput,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
@@ -21,6 +22,7 @@ import {
 } from '../services/musicaApi';
 import TrackItem from '../components/TrackItem';
 import { SPOTIFY_COLORS, SPOTIFY_RADIUS } from '../theme/spotifyTheme';
+import { obterFotoRealGdrive } from '../constants/artistasGdriveMap';
 
 interface ArtistasScreenProps {
   token: string | null;
@@ -170,9 +172,16 @@ export default function ArtistasScreen({ token, player, onAdicionarPlaylist }: A
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* Header Card do Artista */}
           <View style={styles.artistHero}>
-            <View style={styles.artistAvatarLarge}>
-              <Ionicons name="person" size={48} color="#38bdf8" />
-            </View>
+            {obterFotoRealGdrive(artistaAberto.artista) || artistaAberto.foto_perfil_url ? (
+              <Image
+                source={{ uri: (obterFotoRealGdrive(artistaAberto.artista) || artistaAberto.foto_perfil_url)! }}
+                style={styles.artistAvatarLargeImg}
+              />
+            ) : (
+              <View style={styles.artistAvatarLarge}>
+                <Ionicons name="person" size={48} color="#38bdf8" />
+              </View>
+            )}
             <Text style={styles.artistHeroName}>{artistaAberto.artista}</Text>
             <View style={styles.artistHeroBadge}>
               <Ionicons name="musical-notes" size={14} color="#38bdf8" />
@@ -348,9 +357,16 @@ export default function ArtistasScreen({ token, player, onAdicionarPlaylist }: A
             onPress={() => abrirArtista(a)}
             activeOpacity={0.7}
           >
-            <View style={styles.artistAvatar}>
-              <Ionicons name="person" size={22} color="#38bdf8" />
-            </View>
+            {obterFotoRealGdrive(a.artista) || a.foto_perfil_url ? (
+              <Image
+                source={{ uri: (obterFotoRealGdrive(a.artista) || a.foto_perfil_url)! }}
+                style={styles.artistAvatarImg}
+              />
+            ) : (
+              <View style={styles.artistAvatar}>
+                <Ionicons name="person" size={22} color="#38bdf8" />
+              </View>
+            )}
 
             <View style={styles.artistaInfo}>
               <Text style={styles.artistaNome} numberOfLines={1}>{a.artista}</Text>
@@ -440,6 +456,20 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  artistAvatarImg: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#1e293b',
+  },
+  artistAvatarLargeImg: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: '#1e293b',
+    borderWidth: 3,
+    borderColor: '#38bdf8',
   },
   artistAvatar: {
     width: 52,

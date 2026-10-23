@@ -26,6 +26,7 @@ import {
 } from '../services/musicaApi';
 import TrackItem from '../components/TrackItem';
 import { SPOTIFY_COLORS, SPOTIFY_RADIUS } from '../theme/spotifyTheme';
+import { obterFotoRealGdrive } from '../constants/artistasGdriveMap';
 
 const CORES_TILES: Record<string, string> = {
   'Hard Techno': '#2b1055',
@@ -237,10 +238,14 @@ export default function GenerosScreen({
   if (generoSelecionado || artistaSelecionado) {
     const titulo = generoSelecionado ? generoSelecionado.genero : artistaSelecionado || '';
     const subtitulo = generoSelecionado ? 'Gênero Musical' : 'Artista';
-    const foto =
-      generoSelecionado?.genero === 'Rock' || (Boolean(artistaSelecionado) && (artistaSelecionado || '').toLowerCase().includes('charlie'))
-        ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=800&auto=format&fit=crop&q=80'
-        : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80';
+    const foto = artistaSelecionado
+      ? (obterFotoRealGdrive(artistaSelecionado) ||
+         (artistaSelecionado.toLowerCase().includes('charlie')
+           ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=800&auto=format&fit=crop&q=80'
+           : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80'))
+      : (generoSelecionado?.genero === 'Rock'
+           ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=800&auto=format&fit=crop&q=80'
+           : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80');
 
     return (
       <View style={styles.container}>
@@ -442,9 +447,11 @@ export default function GenerosScreen({
                         >
                           <Image
                             source={{
-                              uri: (a.artista || '').toLowerCase().includes('charlie')
-                                ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=300&auto=format&fit=crop&q=80'
-                                : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300&auto=format&fit=crop&q=80',
+                              uri:
+                                obterFotoRealGdrive(a.artista) ||
+                                ((a.artista || '').toLowerCase().includes('charlie')
+                                  ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=300&auto=format&fit=crop&q=80'
+                                  : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300&auto=format&fit=crop&q=80'),
                             }}
                             style={styles.artistResultAvatar}
                           />
@@ -576,9 +583,11 @@ export default function GenerosScreen({
                         >
                           <Image
                             source={{
-                              uri: (a.artista || '').toLowerCase().includes('charlie')
-                                ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=300&auto=format&fit=crop&q=80'
-                                : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300&auto=format&fit=crop&q=80',
+                              uri:
+                                obterFotoRealGdrive(a.artista) ||
+                                ((a.artista || '').toLowerCase().includes('charlie')
+                                  ? 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=300&auto=format&fit=crop&q=80'
+                                  : 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300&auto=format&fit=crop&q=80'),
                             }}
                             style={styles.artistSearchAvatar}
                           />
