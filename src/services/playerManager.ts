@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import { ItemMusica, construirUrlStream, isSameTrack } from './musicaApi';
 import { createAudioPlayer, AudioPlayer, setAudioModeAsync } from 'expo-audio';
+import { obterFotoRealGdrive } from '../constants/artistasGdriveMap';
 
 export interface PlayerStatus {
   isPlaying: boolean;
@@ -181,6 +182,7 @@ class PlayerManager {
           await this.webAudio.play();
           this.isPlaying = true;
           this.isLoading = false;
+          this.setupWebMediaSession(track);
           this.notify();
           this.checkPreloadNext();
           return;
@@ -201,6 +203,7 @@ class PlayerManager {
         }
         this.isPlaying = true;
         this.isLoading = false;
+        this.setupWebMediaSession(track);
         this.notify();
         this.checkPreloadNext();
       } catch (err) {
@@ -230,7 +233,8 @@ class PlayerManager {
         player.volume = this.volume;
         player.loop = this.isLooping;
 
-        const artwork = track.capa_url || (track.genero ? 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80' : undefined);
+        const fotoReal = track.artista ? obterFotoRealGdrive(track.artista) : null;
+        const artwork = track.capa_url || fotoReal || (track.genero ? 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80' : undefined);
 
         try {
           player.setActiveForLockScreen(
@@ -242,8 +246,9 @@ class PlayerManager {
               artworkUrl: artwork,
             },
             {
-              showSeekForward: true,
-              showSeekBackward: true,
+              // Desativa os botoes de avancar/retroceder 10s (seek) na barra de notificacoes
+              showSeekForward: false,
+              showSeekBackward: false,
             }
           );
         } catch (errLock) {
@@ -503,12 +508,54 @@ class PlayerManager {
     }
   }
 
+
+  private setupWebMediaSession(track: ItemMusica) {
+    if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
+      try {
+        const fotoReal = track.artista ? obterFotoRealGdrive(track.artista) : null;
+        const artwork = track.capa_url || fotoReal || (track.genero ? 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80' : undefined);
+
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: track.titulo || 'Faixa sem título',
+          artist: track.artista || 'Wave',
+          album: track.album || track.genero || 'Wave Music',
+          artwork: artwork ? [{ src: artwork, sizes: '512x512', type: 'image/jpeg' }] : [],
+        });
+
+        navigator.mediaSession.playbackState = 'playing';
+
+        navigator.mediaSession.setActionHandler('play', () => {
+          this.resume();
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+          this.pause();
+        });
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+          this.next();
+        });
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+          this.previous();
+        });
+        navigator.mediaSession.setActionHandler('seekto', (details) => {
+          if (details.seekTime != null) {
+            this.seekTo(details.seekTime);
+          }
+        });
+      } catch (e) {
+        // Ignora navegadores com suporte parcial
+      }
+    }
+  }
+
   private setupWebListeners() {
     if (!this.webAudio) return;
 
     // Sincronização em tempo real de reprodução e estado do botão via propriedades (idempotente e sem duplicação)
     this.webAudio.onplay = () => {
       this.isPlaying = true;
+      if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'playing';
+      }
       this.notify();
     };
 
@@ -522,6 +569,9 @@ class PlayerManager {
       // Se não estiver realmente pausado (ex: buffer ou troca de faixa), não marca como pausado
       if (this.webAudio && !this.webAudio.paused) return;
       this.isPlaying = false;
+      if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'paused';
+      }
       this.notify();
     };
 
